@@ -1,5 +1,5 @@
 describe("Type aliasing",()=>{
-        describe ("Name a type, one perhaps otherwise anyonymous",()=>{
+        describe ("Name a type, one perhaps otherwise anonymous",()=>{
             it('comes from an object',()=> {
                 const anObject = {aString: "hello"}
 
@@ -31,17 +31,17 @@ describe("Type aliasing",()=>{
 
             it("comes from a function",()=>{
                 // here, a real function object, with a name
-                function countOccurences(aString: string, aCharacter: string):number{
-                    let occurences = 0
+                function countOccurrences(aString: string, aCharacter: string):number{
+                    let occurrences = 0
                     for(let c of aString){
                         if(c === aCharacter){
-                            occurences++
+                            occurrences++
                         }
                     }
-                    return occurences
+                    return occurrences
                 }
 
-                type Counter = typeof countOccurences
+                type Counter = typeof countOccurrences
 
                 // there doesn't have to be a function of this type yet
                 type CounterApplyer = (aCounter: Counter, aString: string, aCharacter: string) => number // note that '='
@@ -49,7 +49,7 @@ describe("Type aliasing",()=>{
                 // function types are also compatible or not based on shape, this fat-arrow anonymous function is a CounterApplyer
                 const f: CounterApplyer = (aCounter, aString, aChar) => {return aCounter(aString,aChar)}
 
-                expect(countOccurences("aaabbbcdd","c")).toEqual(f(countOccurences,"aabbbcdd", "c"))
+                expect(countOccurrences("aaabbbcdd","c")).toEqual(f(countOccurrences,"aabbbcdd", "c"))
             })
         })
     })

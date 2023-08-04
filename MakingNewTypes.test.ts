@@ -73,7 +73,7 @@ describe("Making new TypeScript types",()=>{
                 }
 
                 function worksOnExactlyTheDerivedClass(arg: DerivedClass): string {
-                    const {aString, aNumber} = arg; // note that the two fields are delcared in this order, but initialised in the opposite order
+                    const {aString, aNumber} = arg; // note that the two fields are declared in this order, but initialised in the opposite order
                     return aString + aNumber
                 }
 
@@ -83,7 +83,7 @@ describe("Making new TypeScript types",()=>{
 
                 function perhapsSurprisinglyWorksOnExactlyTheDerivedClass(arg: DerivedClass):string{
                     const {aNumber, aString} = arg; // this sort of "destructuring" works on field names, not positions
-                    // they are initialised in this order (dervied class fields, then base class fields) but declared in the opposite order
+                    // they are initialised in this order (derived class fields, then base class fields) but declared in the opposite order
                     return aString + aNumber
                 }
 
