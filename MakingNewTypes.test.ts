@@ -32,8 +32,38 @@ describe("Making new TypeScript types",()=> {
             expect(worksOnThingsLikeC(anInstance)).toEqual('hello')
 
         })
-        it("may be done with enums", () => {
+        it("may be done with enums, kinda", () => {
+            enum Thing {
+                FISH, //defaults to 0
+                TIN,  //defaults to 1
+                SKY   //defaults to 2
+            }
+            const aThing: Thing = Thing.FISH // for all you Zappa fans
 
+            expect(typeof aThing).toEqual('number') // huh
+            // but expect(aThing instanceof Thing).toBeTruthy() doesn't compile!
+            // The error is that the RHS of instances of must be a subtype of any, or a Function type
+            // which an enum isn't, apparently
+
+            // and yet, enums can appear in a type context
+            function thingerizer<T extends Thing>(aThinglike: T):void {
+                const whatever: Thing = aThinglike
+            }
+
+            thingerizer(aThing) // fine
+            enum OtherThings {
+                FISH, //defaults to 0
+                TIN,  //defaults to 1
+                SKY,  //defaults to 2
+                BOOT // defaults to 3
+            }
+
+            const anotherThing: OtherThings = OtherThings.FISH
+            // thingerizer(anotherThing) doesn't compile
+            // the error is that OtherThings.FISH is not assignable to type Thing
+
+            // And yet...
+            expect(Thing.FISH).toEqual(OtherThings.FISH) // passes!
         })
     })
     describe("From combinations of existing types", () => {
@@ -178,7 +208,61 @@ describe("Making new TypeScript types",()=> {
             })
 
             describe("What enums really are", () => {
+                describe("names for a bunch of literal constants",()=>{
+                    it("could be default natural numbers",()=>{
+                        enum DefaultValues{
+                            A,
+                            B,
+                            C
+                        }
+                        expect(DefaultValues.B).toEqual(1)
+                    })
 
+                    it("could be natural numbers starting from some specific number",()=>{
+                        enum DefaultValues{
+                            A = 27,
+                            B,
+                            C
+                        }
+                        expect(DefaultValues.C).toEqual(29)
+                    })
+
+                    it("could be arbitrary natural numbers ",()=>{
+                        enum DefaultValues{
+                            A = 23,
+                            B = 42,
+                            C = 0
+                        }
+                        expect(DefaultValues.B).toEqual(42)
+                    })
+
+                    it("could be arbitrary numbers ",()=>{
+                        enum DefaultValues{
+                            A = -23,
+                            B = 4.2,
+                            C = 0
+                        }
+                        expect(DefaultValues.B).toEqual(4.2)
+                    })
+
+                    it("could be numbers or strings",()=>{
+                        enum DefaultValues{
+                            A = "fish",
+                            B = 42,
+                        }
+                        expect(DefaultValues.B).toEqual(42)
+                    })
+
+                    it("could be values and combinations of values",()=>{
+                        enum Thing{
+                            One,
+                            TheOther,
+                            Either = One | TheOther
+                        }
+                        expect(Thing.Either).toEqual(Thing.TheOther) // o-kayyy
+                        expect(Thing.Either).not.toEqual(Thing.One) // this seems, frankly, unfair
+                    })
+                })
             })
         })
     })
