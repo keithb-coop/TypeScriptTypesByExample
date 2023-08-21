@@ -1,3 +1,5 @@
+import exp from "constants";
+
 describe("Making new TypeScript types",()=> {
     describe("New types from scratch", () => {
         it("may be done with classes", () => {
@@ -139,7 +141,7 @@ describe("Making new TypeScript types",()=> {
             })
 
             describe("By reference to existing types", () => {
-                it("can be by references to native JavaScript types", () => {
+                it("which could be native JavaScript types", () => {
                     let anObjectOrANumber: object | number
                     anObjectOrANumber = 1
                     anObjectOrANumber = {}
@@ -179,7 +181,7 @@ describe("Making new TypeScript types",()=> {
             })
 
             it("can be by reference to composite types",()=>{
-                type Holder = StringHolder | NumberHolder // we can say this here as class names are "hoisted"
+                let aHolder: StringHolder | NumberHolder // this works because class names are "hoisted" to the top of their scope
 
                 class NumberHolder{
                     aNumber: number
@@ -204,6 +206,9 @@ describe("Making new TypeScript types",()=> {
                     }
                 }
 
+                aHolder = new NumberHolder(123)
+                expect(aHolder.aNumber).toEqual(123)
+                expect(aHolder.convert()).toEqual(new StringHolder("123"))
 
             })
 
@@ -245,7 +250,7 @@ describe("Making new TypeScript types",()=> {
                         expect(DefaultValues.B).toEqual(4.2)
                     })
 
-                    it("could be numbers or strings",()=>{
+                    it("could be numbers or strings (who knows what for?)",()=>{
                         enum DefaultValues{
                             A = "fish",
                             B = 42,
@@ -253,7 +258,7 @@ describe("Making new TypeScript types",()=> {
                         expect(DefaultValues.B).toEqual(42)
                     })
 
-                    it("could be values and combinations of values",()=>{
+                    it("could be implicit numbers and combinations of values",()=>{
                         enum Thing{
                             One,
                             TheOther,
@@ -261,6 +266,110 @@ describe("Making new TypeScript types",()=> {
                         }
                         expect(Thing.Either).toEqual(Thing.TheOther) // o-kayyy
                         expect(Thing.Either).not.toEqual(Thing.One) // this seems, frankly, unfair
+
+                        // but the following doesn't compile
+
+                        // enum Thing{
+                        //    One= "one",
+                        //   TheOther = "theOther",
+                        //    Either = One | TheOther
+                        // }
+
+                        const oneThing: Thing = Thing.One
+                        const otherThing: Thing = Thing.TheOther
+                        const eitherThing: Thing = Thing.Either
+
+                        let aThing: Thing = Thing.One
+                        expect(aThing).toEqual(0)
+                        expect(aThing).toEqual(Thing.One)
+                        expect(aThing).not.toEqual(Thing.TheOther)
+                        expect(aThing).not.toEqual(Thing.Either)
+
+                        aThing = Thing.TheOther
+                        expect(aThing).toEqual(1)
+                        expect(aThing).toEqual(Thing.TheOther)
+                        expect(aThing).not.toEqual(Thing.One)
+                        expect(aThing).toEqual(Thing.Either) // uh
+
+                        aThing = Thing.Either
+                        expect(aThing).toEqual(1) // in fact, I at first expected 2.
+                        expect(aThing).toEqual(Thing.Either)
+                        expect(aThing).not.toEqual(Thing.One)
+                        expect(aThing).toEqual(Thing.TheOther)
+                    })
+
+
+                    it("could be explicit numbers and combinations of values",()=>{
+                        enum Thing{
+                            One = 1,
+                            TheOther = 2,
+                            Either = One | TheOther
+                        }
+                        expect(Thing.Either).not.toEqual(Thing.One)  // this seems wildly unfair.
+                        expect(Thing.Either).not.toEqual(Thing.TheOther)
+                    })
+                })
+
+                describe("names for a bunch of singleton types!",()=>{
+
+                    enum Thing {
+                        One,
+                        TheOther
+                    }
+
+                    it("creates a type for each element in the enum", ()=> {
+
+                        const aOne: Thing.One = Thing.One
+                        const anOther: Thing.TheOther = Thing.TheOther
+
+                        function thingery(aThing: Thing): Thing { //this type Thing is like One | TheOther
+                            return aThing
+                        }
+
+                        expect(thingery(aOne)).toEqual(Thing.One)
+                        expect(thingery(anOther)).toEqual(Thing.TheOther)
+
+                        function thingerySumType(aThing: Thing.One | Thing.TheOther): Thing {
+                            return aThing
+                        }
+
+                        expect(thingerySumType(aOne)).toEqual(Thing.One)
+                        expect(thingerySumType(anOther)).toEqual(Thing.TheOther)
+                    })
+
+                     it("also creates a type for the union of the strings",()=>{
+
+                        type ThingStrings = keyof typeof Thing
+                        type ReallyTheThingStrings = "One" | "TheOther"
+
+                        function thingStringer(s: ReallyTheThingStrings) : ThingStrings{
+                            return s
+                        }
+
+                        expect(thingStringer("One")).toEqual("One")
+                    })
+                })
+
+                describe("an object",()=>{
+                    enum Thing{
+                        This,
+                        That
+                    }
+
+                    it("has a forward mapping",()=> {
+                        type ThisHaver = { This: number }
+
+                        function theThis(argument: ThisHaver) {
+                            return argument.This
+                        }
+
+                        expect(theThis(Thing)).toEqual(0)
+                        expect(theThis(Thing)).toEqual(Thing.This)
+                    })
+
+                    it("has a reverse mapping",()=>{
+                        expect(Thing[0]).toEqual("This")
+                        expect(Thing[1]).toEqual("That")
                     })
                 })
             })
