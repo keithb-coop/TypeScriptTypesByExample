@@ -65,7 +65,7 @@ describe("Making new TypeScript types",()=> {
             // the error is that OtherThings.FISH is not assignable to type Thing
 
             // And yet...
-            expect(Thing.FISH).toEqual(OtherThings.FISH) // passes!
+            expect(Thing.FISH).toEqual(OtherThings.FISH) // passes! because after all, they are just numbers which happen to be equal
         })
     })
     describe("From combinations of existing types", () => {
@@ -319,10 +319,10 @@ describe("Making new TypeScript types",()=> {
 
                     it("creates a type for each element in the enum", ()=> {
 
-                        const aOne: Thing.One = Thing.One
+                        const aOne: Thing.One = Thing.One // Thing.One appears in a type context on the left, and in a value context on the right
                         const anOther: Thing.TheOther = Thing.TheOther
 
-                        function thingery(aThing: Thing): Thing { //this type Thing is like One | TheOther
+                        function thingery(aThing: Thing): Thing { //this type Thing is like Thing.One | Thing.TheOther
                             return aThing
                         }
 
@@ -337,9 +337,9 @@ describe("Making new TypeScript types",()=> {
                         expect(thingerySumType(anOther)).toEqual(Thing.TheOther)
                     })
 
-                     it("also creates a type for the union of the strings",()=>{
+                     it("also creates a type for the union of the strings naming the members",()=>{
 
-                        type ThingStrings = keyof typeof Thing
+                        type ThingStrings = keyof typeof Thing // note the "keyof" there
                         type ReallyTheThingStrings = "One" | "TheOther"
 
                         function thingStringer(s: ReallyTheThingStrings) : ThingStrings{
@@ -356,7 +356,7 @@ describe("Making new TypeScript types",()=> {
                         That
                     }
 
-                    it("has a forward mapping",()=> {
+                    it("has a forward mapping property",()=> {
                         type ThisHaver = { This: number }
 
                         function theThis(argument: ThisHaver) {
@@ -367,7 +367,7 @@ describe("Making new TypeScript types",()=> {
                         expect(theThis(Thing)).toEqual(Thing.This)
                     })
 
-                    it("has a reverse mapping",()=>{
+                    it("has a reverse mapping too",()=>{
                         expect(Thing[0]).toEqual("This")
                         expect(Thing[1]).toEqual("That")
                     })

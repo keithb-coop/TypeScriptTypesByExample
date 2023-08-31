@@ -100,7 +100,7 @@ describe("Structural typing", () => {
             const b: B = anObject // works fine
 
             // we refer to the object via references of two differently named, differently shaped, yet compatible types
-            expect(a).toEqual(b)
+            expect(a).toBe(b)
         })
 
         it("works for functions, too",()=>{
